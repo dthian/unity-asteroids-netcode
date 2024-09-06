@@ -87,4 +87,16 @@ public class Player : MonoBehaviour
             bullet.AddForce(bulletSpeed * transform.up, ForceMode2D.Impulse);
         }
     }
+
+    private void OnTriggerEnter2D(Collider2D col)
+    {
+        if (col.CompareTag("Asteroid"))
+        {
+            isAlive = false;
+
+            GameManager gameManager = FindObjectOfType<GameManager>();
+            gameManager.NotifyGameOver();
+            Destroy(gameObject);
+        }
+    }
 }
