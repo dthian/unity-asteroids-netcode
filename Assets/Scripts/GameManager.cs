@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,6 +12,11 @@ public class GameManager : MonoBehaviour
     private int level = 0;
 
     [SerializeField] private GameObject gameOverScreen;
+
+    public enum GAMESTATE
+    {
+
+    }
 
     // Update is called once per frame
     void Update()
@@ -59,9 +66,36 @@ public class GameManager : MonoBehaviour
         Vector3 viewPort3 = new Vector3(viewportSpawnPosition.x, viewportSpawnPosition.y, 0);
         Vector3 worldSpawnPosition = Camera.main.ViewportToWorldPoint(viewPort3);
         worldSpawnPosition.z = 0;
-        Asteroid asteroid = Instantiate(asteroidPrefab, worldSpawnPosition, Quaternion.identity);
-        asteroid.gameManager = this;
+        spawnAsteroid(worldSpawnPosition, Asteroid.DEFAULT_SIZE);
     }
+
+    private void spawnAsteroid(Vector3 pos, int size)
+    {
+        Asteroid newAsteroid = Instantiate(asteroidPrefab, pos, Quaternion.identity);
+        newAsteroid.size = size;
+        newAsteroid.notifyDeath = onAsteroidDeath;
+        asteroidCount++;
+    }
+
+    // When an Asteroid Dies, we want to spawn more if
+    // it was a large one.
+    public void onAsteroidDeath(Asteroid asteroid)
+    {
+        // Large size asteroids keep breaking up into smaller ones upon destruction.
+        // Only spawn 2 for every breakup now.
+        if (asteroid.size > 1)
+        {
+            for(int i = 0; i < 2; i ++)
+            {
+                spawnAsteroid(asteroid.transform.position, asteroid.size -1);
+            }
+        }
+
+        // Finally remove the Asteroid that got blown up
+        asteroidCount--;
+    }
+
+
 
     public void NotifyGameOver()
     {

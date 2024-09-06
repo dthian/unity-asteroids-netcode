@@ -1,9 +1,7 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : NetworkBehaviour
 {
     // Player Visual attributes
     [Header("Ship parameters")]
@@ -15,12 +13,15 @@ public class Player : MonoBehaviour
     private Rigidbody2D shipRigidBody;
     private bool isAlive = true;
     private bool isAccelerating = false;
+    private bool isDeccelerating = false;
 
     // Weapon Attributes
     [SerializeField] private Transform bulletSpawnPosition;
     [SerializeField] private Rigidbody2D bulletPrefab;
     [SerializeField] private float bulletSpeed = 8f;
     [SerializeField] private ParticleSystem destroyedParticles;
+
+    public OnDeathNotify OnPlayerDeathNotify;
 
     private void Start()
     {
@@ -36,7 +37,6 @@ public class Player : MonoBehaviour
             HandleCombatInput();
         }
     }
-
     private void FixedUpdate()
     {
         if (!isAlive)
@@ -44,11 +44,19 @@ public class Player : MonoBehaviour
             return;
         }
 
+
         if (isAccelerating)
         {
             // Apply acceleration force and clamp it's speed with a limit
             shipRigidBody.AddForce(shipAccel * transform.up);
             shipRigidBody.velocity = Vector2.ClampMagnitude(shipRigidBody.velocity, shipMaxVelocity);
+        }
+        // Favor acceleration input
+        else if (isDeccelerating)
+        {
+            // Apply acceleration force and clamp it's speed with a limit
+            shipRigidBody.AddForce(-shipAccel * transform.up);
+            shipRigidBody.velocity = Vector2.ClampMagnitude(shipRigidBody.velocity, -shipMaxVelocity);
         }
     }
 
@@ -56,6 +64,7 @@ public class Player : MonoBehaviour
     {
         // Handle translational movement
         isAccelerating = Input.GetKey(KeyCode.UpArrow);
+        isDeccelerating = Input.GetKey(KeyCode.DownArrow);
 
         // Handle rotational movement.
         if (Input.GetKey(KeyCode.LeftArrow))
@@ -67,6 +76,7 @@ public class Player : MonoBehaviour
             transform.Rotate(-shipRotVelocity *  Time.deltaTime * transform.forward);
         }
     }
+
 
     private void HandleCombatInput()
     {
@@ -95,9 +105,8 @@ public class Player : MonoBehaviour
         {
             isAlive = false;
 
-            // Explosion
+            // Explosion and DEAAAAATHHHH
             Instantiate(destroyedParticles, transform.position, Quaternion.identity);
-
             GameManager gameManager = FindObjectOfType<GameManager>();
             gameManager.NotifyGameOver();
             Destroy(gameObject);
