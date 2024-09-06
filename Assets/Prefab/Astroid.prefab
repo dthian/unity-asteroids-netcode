@@ -267,3 +267,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 0}
+  destroyedParticles: {fileID: 3280915734692186146, guid: 65ee1d84cae72414cae6050267c2c1f9, type: 3}

@@ -20,6 +20,7 @@ public class Player : MonoBehaviour
     [SerializeField] private Transform bulletSpawnPosition;
     [SerializeField] private Rigidbody2D bulletPrefab;
     [SerializeField] private float bulletSpeed = 8f;
+    [SerializeField] private ParticleSystem destroyedParticles;
 
     private void Start()
     {
@@ -93,6 +94,9 @@ public class Player : MonoBehaviour
         if (col.CompareTag("Asteroid"))
         {
             isAlive = false;
+
+            // Explosion
+            Instantiate(destroyedParticles, transform.position, Quaternion.identity);
 
             GameManager gameManager = FindObjectOfType<GameManager>();
             gameManager.NotifyGameOver();

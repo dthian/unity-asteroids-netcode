@@ -9,6 +9,8 @@ public class Asteroid : MonoBehaviour
     private int size = 3;
     public GameManager gameManager;
 
+    [SerializeField] private ParticleSystem destroyedParticles;
+
     public void setSize(int newSize)
     {
         size = newSize;
@@ -47,6 +49,9 @@ public class Asteroid : MonoBehaviour
                     newAsteroid.gameManager = gameManager;
                 }
             }
+
+            // Explosion
+            Instantiate(destroyedParticles, transform.position, Quaternion.identity);
 
             // Finally destroy Asteroid that got blown up
             Destroy(gameObject);
